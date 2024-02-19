@@ -1,5 +1,6 @@
 import psycopg
 
+
 con = psycopg.connect(
     dbname="planner",
     user="myuser",
@@ -7,6 +8,13 @@ con = psycopg.connect(
     host="localhost",
     port="5432",
 )
+
+
+def db_connection_check():
+    if str(con.info.status) == "ConnStatus.OK":
+        return True
+    else:
+        return False
 
 
 def add_plan(plan_num: int, plan_name: str):
@@ -63,7 +71,7 @@ def find_run_func(plan_num: int, week: int, day: int):
     return found_run
 
 
-def find_plan_func(search_plan: int | str) -> list | None:
+def find_plan_func(search_plan: int | str) -> list:
     """
     Search for all plans which match search parameter in database.
 
