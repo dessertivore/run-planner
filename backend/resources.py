@@ -5,7 +5,7 @@ con = psycopg.connect(
     dbname="planner",
     user="myuser",
     password="password",
-    host="localhost",
+    host="db",
     port="5432",
 )
 

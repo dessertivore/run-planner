@@ -16,4 +16,4 @@ backend:
 .PHONY: database
 database:
 	cd database/ && docker build -t database .
-	cd database/ && docker run -p 5432:5432 database
+	cd database/ && docker run -p 5432:5432 -h 0.0.0.0 database
