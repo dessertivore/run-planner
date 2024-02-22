@@ -1,4 +1,8 @@
 import psycopg
+from celery import Celery
+from datetime import datetime, timedelta
+
+app = Celery("tasks", broker="pyamqp://guest@localhost//")
 
 
 con = psycopg.connect(
@@ -97,3 +101,36 @@ def find_plan_func(search_plan: int | str) -> list:
         ).fetchall()
     cursor.close()
     return found_plans
+
+
+@app.task
+def reminder(description: str):
+    print("Time to run! Today's run is " + description)
+
+
+def set_run_reminder(plan_of_choice: int) -> None:
+    """
+    Create run reminders once running plan has been chosen.
+
+    Args:
+        plan_of_choice (int): chosen plan. Generates run reminders for all runs
+        in plan
+
+    Requires improved reminders - currently just prints reminder to terminal. Need to
+    create celery docker container, and link with API as well.
+    """
+    cursor = con.cursor()
+    runs_in_plan = cursor.execute(
+        """SELECT run_id, week_no, day_no, description_string FROM planner.public.training_plans WHERE
+            plan_no = %s;""",
+        (plan_of_choice,),
+    ).fetchall()
+    cursor.close()
+    print(runs_in_plan)
+    for run in runs_in_plan:
+        weeks = run[1]
+        days = run[2]
+        description = run[3]
+        days_from_now = weeks * 7 + days
+        send_time = datetime.now() + timedelta(seconds=days_from_now)
+        reminder.apply_async(args=[description], eta=send_time)

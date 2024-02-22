@@ -40,7 +40,7 @@ async def root() -> tuple:
 
 
 @app.post("/runs")
-async def root(week: int, day: int, details: str):
+async def root(plan_num: int, week: int, day: int, details: str):
     """
     Add runs to a plan.
 
@@ -49,7 +49,7 @@ async def root(week: int, day: int, details: str):
         day (int): day number (Monday is 0).
         details (str): E.g. duration/distance/intensity of run.
     """
-    add_run(week, day, details)
+    add_run(plan_num, week, day, details)
 
 
 @app.get("/runs")
