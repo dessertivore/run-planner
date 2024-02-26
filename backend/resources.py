@@ -1,9 +1,58 @@
 import psycopg
 from celery import Celery
 from datetime import datetime, timedelta
+import requests
+from key import client_secret, id, refresh
+
+
+def authorise_strava():
+    """
+    Provides access token for strava check, if authorised by user already.
+    Requires the following in a file called key.py: id (API ID), client_secret, refresh
+    (refresh token)
+
+    Returns:
+        access_token (str): token to access most recent strava activity.
+    """
+    payload = {
+        "client_id": id,
+        "client_secret": client_secret,
+        "refresh_token": refresh,
+        "grant_type": "refresh_token",
+    }
+    r = requests.post(
+        "https://www.strava.com/oauth/token",
+        params=payload,
+    )
+    return r.json()["access_token"]
+
+
+def most_recent_run(access: str) -> tuple:
+    """
+    After user has authorised access, this will find most recent run on strava,
+    and distance in km.
+
+    Args:
+        access (str): access token provided from strava.
+
+    Returns:
+        tuple: name and distance (km) of most recent strava activity.
+    """
+    r = requests.get(
+        "https://www.strava.com/api/v3/athlete/activities",
+        headers={"Authorization": "Bearer " + access},
+        params={"per_page": 1},
+    )
+    print(r.status_code)
+    assert r.ok
+    return r.json()[0]["name"], int(r.json()[0]["distance"]) / 1000
+
+
+access_token = authorise_strava()
+most_recent_run(access_token)
+
 
 app = Celery("tasks", broker="pyamqp://guest@localhost//")
-
 
 con = psycopg.connect(
     dbname="planner",
