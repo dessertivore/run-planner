@@ -1,0 +1,9 @@
+FROM celery:latest
+
+WORKDIR /app
+
+COPY cworker.py /app/
+
+ENV CELERY_BROKER_URL="pyamqp://user:user@rabbitmq:5672//"
+
+ENTRYPOINT ["celery", "-A", "cworker", "worker", "--loglevel=INFO"]

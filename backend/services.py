@@ -7,6 +7,9 @@ from resources import (
     add_plan,
     find_plan_func,
     db_connection_check,
+    authorise_strava,
+    most_recent_run,
+    set_run_reminder,
 )
 from datetime import datetime
 
@@ -88,3 +91,20 @@ async def root(search_plan: int | str) -> list:
         search_plan = int(search_plan)
     plan = find_plan_func(search_plan)
     return plan
+
+
+@app.post("/reminders")
+async def root(plan_of_choice: int):
+    set_run_reminder(plan_of_choice)
+
+
+@app.get("/strava")
+async def root() -> str:
+    """
+    Get new authorisation token for strava access, and find most recent activity
+    uploaded.
+
+    Returns:
+        str: Name and distance (km) of most recent strava upload.
+    """
+    return most_recent_run(authorise_strava())

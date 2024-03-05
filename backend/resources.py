@@ -1,8 +1,8 @@
 import psycopg
-from celery import Celery
 from datetime import datetime, timedelta
 import requests
 from key import client_secret, id, refresh
+from cworker import reminder
 
 
 def authorise_strava():
@@ -27,7 +27,7 @@ def authorise_strava():
     return r.json()["access_token"]
 
 
-def most_recent_run(access: str) -> tuple:
+def most_recent_run(access: str) -> str:
     """
     After user has authorised access, this will find most recent run on strava,
     and distance in km.
@@ -45,14 +45,10 @@ def most_recent_run(access: str) -> tuple:
     )
     print(r.status_code)
     assert r.ok
-    return r.json()[0]["name"], int(r.json()[0]["distance"]) / 1000
+    name = str(r.json()[0]["name"])
+    dist = str(int((r.json()[0]["distance"]) / 1000))
+    return str(name + " --- " + dist + " km")
 
-
-access_token = authorise_strava()
-most_recent_run(access_token)
-
-
-app = Celery("tasks", broker="pyamqp://guest@localhost//")
 
 con = psycopg.connect(
     dbname="planner",
@@ -152,11 +148,6 @@ def find_plan_func(search_plan: int | str) -> list:
     return found_plans
 
 
-@app.task
-def reminder(description: str):
-    print("Time to run! Today's run is " + description)
-
-
 def set_run_reminder(plan_of_choice: int) -> None:
     """
     Create run reminders once running plan has been chosen.
@@ -167,6 +158,7 @@ def set_run_reminder(plan_of_choice: int) -> None:
 
     Requires improved reminders - currently just prints reminder to terminal. Need to
     create celery docker container, and link with API as well.
+    Currently uses time in seconds rather than days, in order to aid testing.
     """
     cursor = con.cursor()
     runs_in_plan = cursor.execute(

@@ -7,7 +7,31 @@ services:
       - "5432:5432"
   
   backend:
-    build: backend/.
+    build:
+      context: backend
+      dockerfile: ../backend/Dockerfile.api
     ports:
       - "8080:8080"
 
+  rabbitmq:
+    build:
+      context: backend
+      dockerfile: ../backend/Dockerfile.rabbit
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+    
+
+  worker:
+    build:
+      context: backend
+      dockerfile: ../backend/Dockerfile.celery
+    # environment:
+    #   CELERY_BROKER_URL: pyamqp://user:user@rabbitmq:5672
+    depends_on: 
+      rabbitmq:
+        condition: service_healthy
+    links:
+      - rabbitmq
