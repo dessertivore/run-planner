@@ -20,7 +20,7 @@ test_data = {"plan_num": 0, "week": 0, "day": 0}
 
 
 @app.get("/healthcheck")
-async def root() -> tuple:
+async def health_check() -> tuple:
     """
     Check database connection, responsiveness of endpoints.
 
@@ -43,7 +43,7 @@ async def root() -> tuple:
 
 
 @app.post("/runs")
-async def root(plan_num: int, week: int, day: int, details: str):
+async def create_run(plan_num: int, week: int, day: int, details: str) -> None:
     """
     Add runs to a plan.
 
@@ -56,7 +56,7 @@ async def root(plan_num: int, week: int, day: int, details: str):
 
 
 @app.get("/runs")
-async def root(plan_num: int, week: int, day: int) -> list:
+async def read_runs(plan_num: int, week: int, day: int) -> list:
     """
     Search for runs.
     """
@@ -65,7 +65,7 @@ async def root(plan_num: int, week: int, day: int) -> list:
 
 
 @app.post("/plans")
-async def root(plan_num: int, plan_name: str):
+async def create_plan(plan_num: int, plan_name: str) -> None:
     """
     Add plans.
 
@@ -77,7 +77,7 @@ async def root(plan_num: int, plan_name: str):
 
 
 @app.get("/plans")
-async def root(search_plan: int | str) -> list:
+async def read_plans(search_plan: int | str) -> list:
     """
     Search for a plan.
 
@@ -94,12 +94,12 @@ async def root(search_plan: int | str) -> list:
 
 
 @app.post("/reminders")
-async def root(plan_of_choice: int):
+async def create_reminders(plan_of_choice: int) -> None:
     set_run_reminder(plan_of_choice)
 
 
 @app.get("/strava")
-async def root() -> str:
+async def check_strava() -> str:
     """
     Get new authorisation token for strava access, and find most recent activity
     uploaded.

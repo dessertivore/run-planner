@@ -2,9 +2,9 @@ install:
 	poetry install
 
 lint:
-	-poetry run ruff .
-	-poetry run black .
-	-poetry run mypy --strict --explicit-package-bases .
+	-cd backend/ && poetry run ruff .
+	-cd backend/ && poetry run black .
+	-cd backend/ && poetry run mypy --strict --explicit-package-bases .
 
 test:
 	poetry run pytest .
