@@ -5,7 +5,7 @@ from key import client_secret, id, refresh
 from cworker import reminder
 
 
-def authorise_strava():
+def authorise_strava() -> str:
     """
     Provides access token for strava check, if authorised by user already.
     Requires the following in a file called key.py: id (API ID), client_secret, refresh
@@ -59,14 +59,14 @@ con = psycopg.connect(
 )
 
 
-def db_connection_check():
+def db_connection_check() -> bool:
     if str(con.info.status) == "ConnStatus.OK":
         return True
     else:
         return False
 
 
-def add_plan(plan_num: int, plan_name: str):
+def add_plan(plan_num: int, plan_name: str) -> None:
     cursor = con.cursor()
     cursor.execute(
         """INSERT INTO planner.public.plan_names (plan_no, plan_name) 
@@ -77,7 +77,7 @@ def add_plan(plan_num: int, plan_name: str):
     con.commit()
 
 
-def add_run(plan_num: int, week: int, day: int, details: str):
+def add_run(plan_num: int, week: int, day: int, details: str) -> None:
     cursor = con.cursor()
     run_id = cursor.execute(
         """SELECT MAX(run_id) AS highest_run_id
@@ -102,7 +102,7 @@ def add_run(plan_num: int, week: int, day: int, details: str):
     con.commit()
 
 
-def find_run_func(plan_num: int, week: int, day: int):
+def find_run_func(plan_num: int, week: int, day: int) -> list:
     cursor = con.cursor()
     found_run = cursor.execute(
         """SELECT description_string FROM planner.public.training_plans WHERE

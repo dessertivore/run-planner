@@ -4,5 +4,5 @@ app = Celery("tasks", broker="pyamqp://user:user@rabbitmq:5672//")
 
 
 @app.task
-def reminder(description: str):
+def reminder(description: str) -> None:
     print("Time to run! Today's run is " + description)
