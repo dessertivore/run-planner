@@ -3,3 +3,4 @@
 /.venv
 /__pycache__
 key.py
+/.ruff_cache
